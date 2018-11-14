@@ -121,7 +121,7 @@ def remove_github(request):
 def update_data(request):
     if request.method == "POST" and request.user.is_authenticated:
         oh_member = request.user.oh_member
-        process_github(oh_member.oh_id)
+        process_github.delay(oh_member.oh_id)
         github_member = oh_member.datasourcemember
         github_member.last_submitted = arrow.now().format()
         github_member.save()
