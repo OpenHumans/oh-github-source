@@ -1,6 +1,6 @@
 from django.test import TestCase, Client
 import vcr
-from open_humans.models import OpenHumansMember
+from openhumans.models import OpenHumansMember
 from django.conf import settings
 
 FILTERSET = [('access_token', 'ACCESSTOKEN')]

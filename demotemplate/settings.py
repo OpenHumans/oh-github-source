@@ -50,6 +50,8 @@ if OPENHUMANS_APP_BASE_URL[-1] == "/":
     OPENHUMANS_APP_BASE_URL = OPENHUMANS_APP_BASE_URL[:-1]
 
 # Open Humans configuration
+LOGIN_REDIRECT_URL='/'
+LOGOUT_REDIRECT_URL='/'
 OPENHUMANS_CLIENT_ID = os.getenv('OH_CLIENT_ID')
 OPENHUMANS_CLIENT_SECRET = os.getenv('OH_CLIENT_SECRET')
 OH_ACTIVITY_PAGE = os.getenv('OH_ACTIVITY_PAGE')
@@ -95,8 +97,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # Local apps. Update these if you add or change app names!
+    'openhumans',
     'datauploader.apps.DatauploaderConfig',
-    'open_humans.apps.OpenHumansConfig',
     'main.apps.MainConfig'
 ]
 

@@ -9,7 +9,7 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('open_humans', '0002_auto_20180409_0413'),
+        ('openhumans', '0001_initial'),
     ]
 
     operations = [
@@ -17,7 +17,7 @@ class Migration(migrations.Migration):
             name='DataSourceMember',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='open_humans.OpenHumansMember')),
+                ('user', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, to='openhumans.OpenHumansMember')),
             ],
         ),
     ]

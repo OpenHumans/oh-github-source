@@ -16,6 +16,7 @@ env-tools = "*"
 redis = "*"
 pyyaml = "*"
 open-humans-api = "*"
+django-open-humans = "*"
 
 [dev-packages]
 vcrpy = "*"

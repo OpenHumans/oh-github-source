@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from open_humans.models import OpenHumansMember
+from openhumans.models import OpenHumansMember
 from main.models import DataSourceMember
 from django.conf import settings
 from datauploader.tasks import process_github

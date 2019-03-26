@@ -11,7 +11,7 @@ import requests
 import os
 from celery import shared_task
 from django.conf import settings
-from open_humans.models import OpenHumansMember
+from openhumans.models import OpenHumansMember
 from datetime import datetime, timedelta
 from demotemplate.settings import rr
 from requests_respectful import RequestsRespectfulRateLimitedError
