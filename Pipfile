@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 django = "*"
-celery = "*"
+celery = "==4.2.2"
 arrow = "*"
 requests = "*"
 gunicorn = "*"
