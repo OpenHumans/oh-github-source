@@ -8,5 +8,6 @@ urlpatterns = [
     path('github_complete/', views.github_complete, name='github_complete'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('update_data/', views.update_data, name='update_data'),
-    path('remove_github/', views.remove_github, name='remove_github')
+    path('remove_github/', views.remove_github, name='remove_github'),
+    path('about/', views.about, name="about")
 ]

@@ -1,71 +1,49 @@
 {% extends 'main/base.html' %}
 {% load static %}
-{% block content %}
 
-  <div class="container">
-    <h1>Integrate your <i>Github</i> account into <i>Open Humans</i></h1>
-    <p class="lead">
-      This app connects your <i>Github</i> to your
-      <a href="https://www.openhumans.org/">Open Humans</a> account and
-      makes sure to update your data regularly.
-    </p>
-    <p class="lead">
-      Learn more by visiting our
-      <a href="{{ oh_proj_page }}">page on Open Humans</a>.
-    </p>
+{% block main %}
+<div class="jumbotron">
+  <div class="container-fluid">
     <div class="row">
-      <div class="col-md-6">
-        <h2>How it works</h2>
-        <ol>
-          <li><b>Click the button below</b><br>
-            This takes you to Open Humans authentification page.</li>
-          <li><b>Log in or create an Open Humans account</b><br>
-            Your Github data will be added to this account.</li>
-          <li><b>Authorize this app in Open Humans</b><br>
-            This authorizes us to add your Github data to your account.</li>
-          <li><b>Authorize us to access your Github account.</b><br>
-            The Open Humans website will redirect you back to us for the last
-            step: Authorizing us to access your <i>Github</i> account.
-          </li>
-        </ol>
-        {% if client_id %}
-        <a
-          class="btn btn-primary btn-lg"
-          href="https://www.openhumans.org/direct-sharing/projects/oauth2/authorize/?client_id={{ client_id }}&response_type=code"
-          {% else %}
-          class="btn btn-default disabled"
-          {% endif %}
-          >
-          Start with Open Humans authorization
-        </a>
-        {% if not client_id %}
-        <p class="text-muted"><i>
-          This button is disabled because client_id hasn't been configured.
-        </i></p>
-        {% endif %}
+      <div class="col" style="text-align: center;">
+        <img class="img-fluid oh-cnxn-icon" src="{% static 'img/logo.png' %}">
       </div>
-      <div class='col-md-6'>
-        <h2>FAQ</h2>
-        <ol>
-          <li><b>Will my data from Github be public?</b><br>
-            <b>The short answer</b>: No, by connecting your account you don't agree
-            to make your data public or give anyone access to this data.
-            It will be stored in your Open Humans account and you decide with whom to share.<br>
-            <b>The longer answer</b>: It can be public if you want it to be public.
-            If you're logged in into Open Humans <a href='https://www.openhumans.org/public-data/'>
-              can make individual sources publicly available
-            through the public data feature</a>.
-          </li>
-          <li><b>Do you keep my data up to date?</b><br>
-            Yes, we regularly update your data to keep it up to date.
-          After logging in you can also manually trigger an update.</li>
-          <li><b>Who's running this project?</b><br>
-            This project is run by the team of Open Humans itself.</li>
-          <li><b>How can I be in touch with you?</b><br>
-            You can reach us via email at support@openhumans.org
-          </li>
-        </ol>
+      <div class="col-md-9 col-lg-10">
+        <h1>Open&nbsp;Humans&nbsp;/ Github&nbsp;API Connection</h1>
+        <p>
+          Github has data about your own repos, orgs, followers, starred repos, and more.
+          You can use this website to retrieve and store detailed data from your Github account in your Open Humans account.
+        </p>
       </div>
     </div>
+    <div class="row">
+      <div class="col-md-9 offset-md-3 col-lg-10 offset-lg-2">
+        <a href="https://www.openhumans.org/direct-sharing/projects/oauth2/authorize/?client_id={{ client_id }}&response_type=code" class="btn btn-primary">
+          Log in via Open Humans
+        </a>
+      </div>
+    </div>
+  </div>
 </div>
-{% endblock %}
+
+
+<p>
+  <a href="https://github.com">Github</a> is a web based hosting service for version control using Git.
+  This website can be used to retrieve and store detailed information about your repos, stars, followers, and more in your Open Humans account, in an ongoing manner. Once you add this data to Open Humans, you can choose to share or explore it!
+</p>
+
+<p>
+  Check out <a href="{{ oh_proj_page }}">this project's activity page</a>
+  to see how notebooks, projects, and members are using & sharing this data.
+  (Once connected, you can also find your data on this page!)
+</p>
+
+<p>
+  This site is managed by
+  <a href="https://www.openhumans.org">Open Humans</a> and follows the same
+  <a href="https://www.openhumans.org/terms">terms of use</a>.
+  Data stored in Open Humans is private by default: it's your personal archive
+  and always available to you, and you choose when to share with others.
+</p>
+
+{% endblock main %}
