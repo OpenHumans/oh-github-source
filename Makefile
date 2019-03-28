@@ -1,5 +1,7 @@
+SHELL := /bin/bash
+
 .PHONY: local
-local:
+local: redis pipenv
 	@heroku local
 
 .PHONY: pip
@@ -8,8 +10,10 @@ pip:
 
 .PHONY: pipenv
 pipenv:
-	@pipenv shell
+	# activate pipenv if not active, otherwise do nothing
+	@if [[ `pip -V` == *"virtualenvs"* ]]; then echo "pipenv shell active already :)"; else pipenv shell; echo "pipenv shell activated";fi
 
 .PHONY: redis
 redis:
-	@docker run -p 6379:6379 -d redis
+	# create a new docker container with the redis image if one is not already running on port 6379, otherwise do nothing
+	@if [[ -z "`docker ps | grep 0.0.0.0:6379`" ]]; then docker run -p 6379:6379 -d redis; echo "redis docker container now running";  else echo "redis docker container already running:)";fi

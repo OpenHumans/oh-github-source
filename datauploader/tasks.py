@@ -14,6 +14,7 @@ from django.conf import settings
 from openhumans.models import OpenHumansMember
 from datetime import datetime, timedelta
 from demotemplate.settings import rr
+from datauploader.gql import TEST_QUERY
 from requests_respectful import RequestsRespectfulRateLimitedError
 from ohapi import api
 import arrow
@@ -37,7 +38,7 @@ def process_github(oh_id):
     oh_access_token = oh_member.get_access_token(
                             client_id=settings.OPENHUMANS_CLIENT_ID,
                             client_secret=settings.OPENHUMANS_CLIENT_SECRET)
-    github_data = get_existing_github(oh_access_token) # does it matter if we get existing?? updates may not be sequential. need to examine data
+    github_data = get_existing_github_data(oh_access_token) # does it matter if we get existing?? updates may not be sequential. need to examine data
     github_member = oh_member.datasourcemember
     github_access_token = github_member.get_access_token(
                             client_id=settings.GITHUB_CLIENT_ID,
@@ -57,130 +58,10 @@ def update_github(oh_member, github_access_token, github_data):
                          + timedelta(days=7)).isocalendar()
         # while start_date_iso != stop_date_iso:
         print(f'processing {oh_member.oh_id}-{oh_member.oh_id} for member {oh_member.oh_id}')
-            # query = GITHUB_API_STORY + \
-            #          '/{0}-W{1}?trackPoints=true&access_token={2}'.format(
-            #             start_date_iso,
-            #             stop_date_iso,
-            #             github_access_token
-            #          )
-        query = """ 
-          { 
-            viewer {
-              login  
-              url
-              id
-              email
-              bio
-              company
-              companyHTML
-              pullRequests{
-                totalCount
-              }
-              gists {
-              totalCount
-          }
-            company
-            repositoriesContributedTo(first:10){
-              totalCount
-              edges{
-                node{
-                  name
-                  id
-                  forkCount
-                  issues(first:5){
-                    totalCount
-                    edges{
-                      node{
-                        author{
-                          resourcePath
-                        }
-                        assignees{
-                          totalCount
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            repositories(isFork:false, first:10){
-              totalCount
-              edges{
-                node{
-                  name
-                  id
-                  forkCount
-                  issues(first:10){
-                    totalCount
-                    edges{
-                      node{
-                        author{
-                          resourcePath
-                        }
-                        assignees{
-                          totalCount
-                        }
-                        participants{
-                          totalCount
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-            forked: repositories(isFork:true, first:10){
-              totalCount
-                edges{
-                  node{
-                    name
-                    id
-                    forkCount
-                  }
-                }
-              }
-            starredRepositories(first:10) {
-              totalCount
-              edges {
-                node {
-                  name
-                  id
-                  forkCount
-                }
-              }
-            }
-            following(first:10){
-              totalCount
-              nodes{
-                name
-                id
-                url
-              }
-            }
-            followers(first:10) {
-              edges {
-                node {
-                  name
-                  id
-                  url
-                }
-              }
-            }
-          }
-        }      
-        """
-        # Construct the authorization headers for github
-        auth_string = "Bearer " + github_access_token 
-        auth_header = {"Authorization": auth_string}
-        # Make the request via POST, add query string & auth headers
-        response = rr.post(GITHUB_GRAPHQL_BASE, json={'query': query}, headers=auth_header, realms=['github'])
-        # Debug print
-        # response.json())
-        
+        query = TEST_QUERY
+        response = graphql_query(github_access_token, query)
         github_data = response.json()
-
         print(github_data)
-
         print('successfully finished update for {}'.format(oh_member.oh_id))
         github_member = oh_member.datasourcemember
         github_member.last_updated = arrow.now().format()
@@ -193,6 +74,12 @@ def update_github(oh_member, github_access_token, github_data):
         process_github.apply_async(args=[oh_member.oh_id], countdown=61)  
     finally:
         replace_github(oh_member, github_data)
+
+
+def graphql_query(github_access_token, query):
+    auth_header = {"Authorization": "Bearer " + github_access_token}
+    response = rr.post(GITHUB_GRAPHQL_BASE, json={'query': query}, headers=auth_header, realms=['github'])
+    return response
 
 
 def replace_github(oh_member, github_data):
@@ -243,7 +130,7 @@ def get_start_date(github_data, github_access_token):
         return github_data[-1]['date']
 
 
-def get_existing_github(oh_access_token):
+def get_existing_github_data(oh_access_token):
     member = api.exchange_oauth2_member(oh_access_token)
     for dfile in member['data']:
         if 'Github' in dfile['metadata']['tags']:
