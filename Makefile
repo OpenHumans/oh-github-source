@@ -1,8 +1,11 @@
 SHELL := /bin/bash
 
 .PHONY: local
-local: redis pipenv
+local:
 	@heroku local
+
+.PHONY: deps
+deps: redis pipenv
 
 .PHONY: pip
 pip:

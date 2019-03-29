@@ -24,6 +24,7 @@ vcrpy = "*"
 freezegun = "*"
 coverage = "*"
 pylint = "*"
+ipdb = "*"
 
 [requires]
 python_version = "3.6"

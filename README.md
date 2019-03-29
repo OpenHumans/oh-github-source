@@ -11,7 +11,7 @@ We have a Makefile with common commands.
 
 Do `make pip` once to install dependencies (using pipenv)
 
-Every time you want to run locally, do `make local`. The app will be available at `127.0.0.1:5000`
+Every time you want to run locally, do `make deps` and then `make local`. The app will be available at `127.0.0.1:5000`
 
 
 # The OH Github integration

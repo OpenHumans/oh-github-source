@@ -14,6 +14,7 @@ from django.conf import settings
 from openhumans.models import OpenHumansMember
 from datetime import datetime, timedelta
 from datauploader.api.gql import TEST_QUERY, graphql_query
+from demotemplate.settings import rr
 from requests_respectful import RequestsRespectfulRateLimitedError
 from ohapi import api
 import arrow
@@ -56,6 +57,7 @@ def update_github(oh_member, github_access_token, github_data):
                          + timedelta(days=7)).isocalendar()
         # while start_date_iso != stop_date_iso:
         print(f'processing {oh_member.oh_id}-{oh_member.oh_id} for member {oh_member.oh_id}')
+        print(github_access_token)
         query = TEST_QUERY
         response = graphql_query(github_access_token, query)
         github_data = response.json()
@@ -100,6 +102,7 @@ def replace_github(oh_member, github_data):
 
 
 def remove_partial_data(github_data, start_date):
+    return # FIXME: need to rethink this logic anyway
     remove_indexes = []
     for i, element in enumerate(github_data):
         element_date = datetime.strptime(
@@ -121,7 +124,8 @@ def get_start_date(github_data, github_access_token):
         print(reso)
         return reso['created_at']
     else:
-        return github_data[-1]['date']
+        # FIXME
+        return datetime.now()
 
 
 def get_existing_github_data(oh_access_token):
