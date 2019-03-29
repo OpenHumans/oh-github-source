@@ -1,17 +1,16 @@
 import logging
 import requests
 from django.contrib import messages
-from django.contrib.auth import login, logout
+from django.contrib.auth import logout
 from django.shortcuts import render, redirect
 from django.conf import settings
-from openhumans.models import OpenHumansMember
 from .models import DataSourceMember
-from .helpers import get_github_file, check_update
+from .helpers import get_github_file
 from datauploader.tasks import process_github
 from ohapi import api
 import arrow
 
-# Set up logging.
+
 logger = logging.getLogger(__name__)
 
 

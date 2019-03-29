@@ -1,3 +1,13 @@
+from demotemplate.settings import rr
+
+
+GITHUB_GRAPHQL_BASE = 'https://api.github.com/graphql'
+
+def graphql_query(github_access_token, query):
+    auth_header = {"Authorization": "Bearer " + github_access_token}
+    response = rr.post(GITHUB_GRAPHQL_BASE, json={'query': query}, headers=auth_header, realms=['github'])
+    return response
+
 # a test query for graphql
 TEST_QUERY = """ 
    { 

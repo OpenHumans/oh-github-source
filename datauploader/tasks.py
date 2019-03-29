@@ -13,8 +13,7 @@ from celery import shared_task
 from django.conf import settings
 from openhumans.models import OpenHumansMember
 from datetime import datetime, timedelta
-from demotemplate.settings import rr
-from datauploader.gql import TEST_QUERY
+from datauploader.api.gql import TEST_QUERY, graphql_query
 from requests_respectful import RequestsRespectfulRateLimitedError
 from ohapi import api
 import arrow
@@ -22,7 +21,6 @@ import arrow
 # Set up logging.
 logger = logging.getLogger(__name__)
 
-GITHUB_GRAPHQL_BASE = 'https://api.github.com/graphql'
 GITHUB_API_BASE = 'https://api.github.com'
 # GITHUB_API_STORY = GITHUB_API_BASE + '/feeds'
 # GITHUB_API_REPO = GITHUB_API_BASE + '/user/repos'
@@ -76,10 +74,6 @@ def update_github(oh_member, github_access_token, github_data):
         replace_github(oh_member, github_data)
 
 
-def graphql_query(github_access_token, query):
-    auth_header = {"Authorization": "Bearer " + github_access_token}
-    response = rr.post(GITHUB_GRAPHQL_BASE, json={'query': query}, headers=auth_header, realms=['github'])
-    return response
 
 
 def replace_github(oh_member, github_data):

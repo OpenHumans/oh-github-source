@@ -3,6 +3,7 @@
 ## Requirements
 - pipenv
 - docker
+- heroku-cli
 
 ## Commands
 
