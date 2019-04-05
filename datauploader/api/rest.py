@@ -8,6 +8,12 @@ import requests
 
 GITHUB_RATE_LIMIT_ENDPOINT = "https://api.github.com/rate_limit"
 GITHUB_REPOS_ENDPOINT = "https://api.github.com/user/repos?sort=created&per_page=100"
+GITHUB_EVENTS_ENDPOINT = "https://api.github.com/users/carolinux/events?sort=created&per_page=100" #FIXME, get username
+
+GITHUB_EVENTS_ENDPOINT="https://api.github.com/repos/anitagraser/TimeManager/commits?author=carolinux&per_page=100"
+
+#https://api.github.com/repos/carolinux/Subs.py/commits?author=carolinux&per_page=100
+# also allows for a since param in the url
 
 
 def get_auth_header(github_access_token):
@@ -38,6 +44,25 @@ def get_user_repos(github_access_token):
         cnt+=1
         response = requests.get(url, headers=get_auth_header(github_access_token))
         results += json.loads(response.content)
+        next = response.links.get('next')
+        if not next:
+            break
+        else:
+            url = next['url']
+    #print("Called the api {} times".format(cnt))
+    return results
+
+
+def get_user_events(github_access_token):
+    results = []
+    cnt = 0
+    url = GITHUB_EVENTS_ENDPOINT
+    while(True):
+        cnt+=1
+        response = requests.get(url, headers=get_auth_header(github_access_token))
+        results += json.loads(response.content)
+        # if results['type'] == 'PushEvent'
+        # results[0]['payload']['commits'][0]['message']
         next = response.links.get('next')
         if not next:
             break
