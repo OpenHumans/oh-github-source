@@ -6,11 +6,10 @@ import requests
 # https://developer.github.com/v3/#pagination
 
 
+GITHUB_USER_INFO_ENDPOINT = "https://api.github.com/user"
 GITHUB_RATE_LIMIT_ENDPOINT = "https://api.github.com/rate_limit"
 GITHUB_REPOS_ENDPOINT = "https://api.github.com/user/repos?sort=created&per_page=100"
-GITHUB_EVENTS_ENDPOINT = "https://api.github.com/users/carolinux/events?sort=created&per_page=100" #FIXME, get username
-
-GITHUB_EVENTS_ENDPOINT="https://api.github.com/repos/anitagraser/TimeManager/commits?author=carolinux&per_page=100"
+GITHUB_REPO_COMMITS_ENDPOINT = "https://api.github.com/repos/{}/commits?author={}&per_page=100"
 
 #https://api.github.com/repos/carolinux/Subs.py/commits?author=carolinux&per_page=100
 # also allows for a since param in the url
@@ -19,6 +18,10 @@ GITHUB_EVENTS_ENDPOINT="https://api.github.com/repos/anitagraser/TimeManager/com
 def get_auth_header(github_access_token):
     auth_header = {"Authorization": "Bearer " + github_access_token}
     return auth_header
+
+
+def get_full_names_from_repos(repos):
+    return [repo['full_name'] for repo in repos]
 
 
 def get_rate_limit_remaining(github_access_token, type="core"):
@@ -34,6 +37,12 @@ def get_rate_limit_remaining(github_access_token, type="core"):
     response = requests.get(GITHUB_RATE_LIMIT_ENDPOINT, headers=auth_header)
     rate_limit_info = json.loads(response.content)['resources'][type]
     return rate_limit_info['remaining'], rate_limit_info['reset']
+
+
+def get_user_info(github_access_token):
+    auth_header = get_auth_header(github_access_token)
+    response = requests.get(GITHUB_USER_INFO_ENDPOINT, headers=auth_header)
+    return json.loads(response.content)
 
 
 def get_user_repos(github_access_token):
@@ -53,10 +62,10 @@ def get_user_repos(github_access_token):
     return results
 
 
-def get_user_events(github_access_token):
+def get_repo_commits_for_user(github_access_token, repo, username):
     results = []
     cnt = 0
-    url = GITHUB_EVENTS_ENDPOINT
+    url = GITHUB_REPO_COMMITS_ENDPOINT.format(repo, username)
     while(True):
         cnt+=1
         response = requests.get(url, headers=get_auth_header(github_access_token))
