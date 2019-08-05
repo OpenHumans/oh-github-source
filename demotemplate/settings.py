@@ -68,22 +68,22 @@ GITHUB_CLIENT_SECRET = os.getenv('GITHUB_CLIENT_SECRET')
 GITHUB_REDIRECT_URI = os.getenv('GITHUB_REDIRECT_URI')
 
 # Requests Respectful (rate limiting, waiting)
-if REMOTE is True:
-    from urllib.parse import urlparse
-    url_object = urlparse(os.getenv('REDIS_URL', 'redis://'))
-    # logger.info('Connecting to redis at %s:%s',
-    #     url_object.hostname,
-    #     url_object.port)
-    RespectfulRequester.configure(
-        redis={
-            "host": url_object.hostname,
-            "port": url_object.port,
-            "password": url_object.password,
-            "database": 0
-        },
-        safety_threshold=5)
+from urllib.parse import urlparse
+url_object = urlparse(os.getenv('REDIS_URL', 'redis://127.0.0.1:6379'))
+print('Connecting to redis at %s:%s',
+     url_object.hostname,
+     url_object.port)
+RespectfulRequester.configure(
+    redis={
+        "host": url_object.hostname,
+        "port": url_object.port,
+        "password": url_object.password,
+        "database": 0
+    },
+    safety_threshold=5)
 
 # This creates a Realm called "github" that allows 150 requests per minute maximum.
+
 rr = RespectfulRequester()
 rr.register_realm("github", max_requests=5000, timespan=3600)
 

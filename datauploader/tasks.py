@@ -37,7 +37,7 @@ def process_github(oh_id):
     oh_access_token = oh_member.get_access_token(
                             client_id=settings.OPENHUMANS_CLIENT_ID,
                             client_secret=settings.OPENHUMANS_CLIENT_SECRET)
-    github_data = get_existing_github_data(oh_access_token) # does it matter if we get existing?? updates may not be sequential. need to examine data
+    github_data = get_existing_github_data(oh_access_token)#
     github_member = oh_member.datasourcemember
     github_access_token = github_member.get_access_token(
                             client_id=settings.GITHUB_CLIENT_ID,
@@ -47,85 +47,7 @@ def process_github(oh_id):
 
 
 def update_github(oh_member, github_access_token, github_data):
-    print(github_data)
-    try: 
-        start_date_iso = arrow.get(get_start_date(github_data, github_access_token)).datetime.isocalendar()
-        print(start_date_iso)
-        print(type(start_date_iso))
-        github_data = remove_partial_data(github_data, start_date_iso)
-        stop_date_iso = (datetime.utcnow()
-                         + timedelta(days=7)).isocalendar()
-        # while start_date_iso != stop_date_iso:
-        print(f'processing {oh_member.oh_id}-{oh_member.oh_id} for member {oh_member.oh_id}')
-        print(github_access_token)
-        query = TEST_QUERY
-        response = graphql_query(github_access_token, query)
-        github_data = response.json()
-        print(github_data)
-        print('successfully finished update for {}'.format(oh_member.oh_id))
-        github_member = oh_member.datasourcemember
-        github_member.last_updated = arrow.now().format()
-        github_member.save()
-    except RequestsRespectfulRateLimitedError:
-        logger.debug(
-            'requeued processing for {} with 60 secs delay'.format(
-                oh_member.oh_id)
-                )
-        process_github.apply_async(args=[oh_member.oh_id], countdown=61)  
-    finally:
-        replace_github(oh_member, github_data)
-
-
-
-
-def replace_github(oh_member, github_data):
-    # delete old file and upload new to open humans
-    tmp_directory = tempfile.mkdtemp()
-    metadata = {
-        'description':
-        'Github activity feed, repository contents and stars data.',
-        'tags': ['demo', 'Github', 'test'],
-        'updated_at': str(datetime.utcnow()),
-        }
-    out_file = os.path.join(tmp_directory, 'github-data.json')
-    logger.debug('deleted old file for {}'.format(oh_member.oh_id))
-    api.delete_file(oh_member.access_token,
-                    oh_member.oh_id,
-                    file_basename="dummy-data.json")
-    with open(out_file, 'w') as json_file:
-        json.dump(github_data, json_file)
-        json_file.flush()
-    api.upload_aws(out_file, metadata,
-                   oh_member.access_token,
-                   project_member_id=oh_member.oh_id)
-    logger.debug('uploaded new file for {}'.format(oh_member.oh_id))
-
-
-def remove_partial_data(github_data, start_date):
-    return # FIXME: need to rethink this logic anyway
-    remove_indexes = []
-    for i, element in enumerate(github_data):
-        element_date = datetime.strptime(
-                                element['date'], "%Y%m%d").isocalendar()[:2]
-        if element_date == start_date:
-            remove_indexes.append(i)
-    for index in sorted(remove_indexes, reverse=True):
-        del github_data[index]
-    return github_data
-
-
-def get_start_date(github_data, github_access_token):
-    if not github_data:
-        url = GITHUB_API_BASE + "/user?access_token={}".format(
-                                        github_access_token
-        )
-        response = rr.get(url, wait=True, realms=['github'])
-        reso = response.json()
-        print(reso)
-        return reso['created_at']
-    else:
-        # FIXME
-        return datetime.now()
+    pass
 
 
 def get_existing_github_data(oh_access_token):
