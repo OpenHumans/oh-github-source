@@ -49,7 +49,7 @@ def process_github(oh_id):
     gh_file = gh_api.get_github_data(oh_member, github_access_token, current_dt)
 
     existing_file_ids = get_existing_file_ids(oh_member)
-
+    print(existing_file_ids)
     api.upload_aws(gh_file, create_file_metadata(),
                    oh_access_token,
                    project_member_id=oh_id,

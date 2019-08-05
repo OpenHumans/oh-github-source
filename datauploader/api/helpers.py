@@ -26,5 +26,5 @@ def get_existing_file_ids(oh_member):
     for file_info in oh_member.list_files():
         if 'Github' in file_info['metadata']['tags']:
             id = file_info['id']
-            ids.append(ids)
+            ids.append(id)
     return ids
