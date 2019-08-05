@@ -2,7 +2,10 @@ import json
 import requests
 
 
-from datauploader.api.helpers import write_jsonfile_to_tmp_dir
+from ohapi import api
+
+
+from datauploader.api.helpers import write_jsonfile_to_tmp_dir, download_to_json
 
 # sort order is most recently created first
 # max page size = 100 (may not be respected or vary, but this is the max max)
@@ -17,11 +20,34 @@ GITHUB_REPO_COMMITS_ENDPOINT = "https://api.github.com/repos/{}/commits?author={
 
 def get_github_data(oh_access_token, gh_access_token, current_date):
 
-    start_dt = None # TODO: how to get the appropriate start date
-    github_data = GithubData.from_API(gh_access_token, start_dt, current_date)
-    full_file_name = write_jsonfile_to_tmp_dir('github.json', github_data.to_json())
+    existing_github_data = get_last_synced_data(oh_access_token)
+    new_github_data = GithubData.from_API(gh_access_token, existing_github_data)
+    full_file_name = write_jsonfile_to_tmp_dir('github.json', new_github_data.to_json())
 
     return full_file_name
+
+
+def get_last_synced_data(oh_access_token):
+    download_url = get_latest_github_file_url(oh_access_token)
+    if download_url:
+        existing_data_json = download_to_json(download_url)
+        last_data = GithubData.from_json(existing_data_json)
+    else:
+        last_data = None
+
+    return last_data
+
+
+def get_latest_github_file_url(oh_access_token):
+    member = api.exchange_oauth2_member(oh_access_token)
+    download_url = None
+    last_updated_at = None
+    for dfile in member['data']:
+        if 'GoogleFit' in dfile['metadata']['tags']:
+            if last_updated_at is None or dfile['metadata'].get('updated_at', '') >= last_updated_at:
+                last_updated_at = dfile['metadata']['updated_at']
+                download_url = dfile['download_url']
+    return download_url
 
 
 def get_auth_header(github_access_token):
@@ -71,14 +97,23 @@ def get_user_repos(github_access_token):
     return results
 
 
-def get_repo_commits_for_user(github_access_token, repo, username):
+def get_repo_commits_for_user(github_access_token, repo, username, sync_after_date):
     results = []
     cnt = 0
     url = GITHUB_REPO_COMMITS_ENDPOINT.format(repo, username)
-    while(True):
+    # commits are fetched chronologically
+    latest_commit_date = None
+    while True:
         cnt+=1
         response = requests.get(url, headers=get_auth_header(github_access_token))
-        results += json.loads(response.content)
+        commits = json.loads(response.content)
+
+        if latest_commit_date is None and len(commits) > 0:
+            # github returns the data in descending chronological order
+            # date is in the format 2014-05-09T15:14:07Z
+            latest_commit_date = commits[0]['commit']['committer']['date']
+
+        results += commits
         # if results['type'] == 'PushEvent'
         # results[0]['payload']['commits'][0]['message']
         next = response.links.get('next')
@@ -87,7 +122,7 @@ def get_repo_commits_for_user(github_access_token, repo, username):
         else:
             url = next['url']
     #print("Called the api {} times".format(cnt))
-    return results
+    return results, latest_commit_date
 
 
 class GithubData(object):
@@ -101,8 +136,8 @@ class GithubData(object):
         return str(self.metadata) + '\n' + str(self.repo_data.keys())
 
     @classmethod
-    def from_API(self, token, start_dt, end_dt):
-        # TODO handle stopping once we reach already synced data
+    def from_API(self, token, existing_data):
+
         print("Starting rate limit status:")
         print(get_rate_limit_remaining(token))
         username = get_user_info(token).get('login')
@@ -112,9 +147,12 @@ class GithubData(object):
         repo_data = {}
         for repo_name in repo_names:
             print("Fetching commits for {}".format(repo_name))
-            repo_commits = get_repo_commits_for_user(token, repo_name, username)
+            # TODO handle stopping once we reach already synced data
+            repo_commits, latest_date = get_repo_commits_for_user(token, repo_name, username, sync_after_date=None)
             print("Fetched {} commits".format(len(repo_commits)))
-            repo_data[repo_name] = {"commits": repo_commits}
+            # TODO: here, if this repo exists in the existing data, need to merge the commits
+            repo_data[repo_name] = {"commits": repo_commits, "last_commit_date": latest_date,
+                                    "num_commits": len(repo_commits)}
 
         metadata = {"username": username, "num_repos": len(repos)}
 
@@ -124,7 +162,8 @@ class GithubData(object):
 
     @classmethod
     def from_json(self, json_data):
-        pass
+        metadata = json_data['metadata']
+        return GithubData(repo_data=json_data['repo_data'], metadata=metadata)
 
     def to_json(self):
         return {

@@ -1,6 +1,7 @@
 from datetime import datetime
 import json
 import os
+import requests
 import tempfile
 
 
@@ -28,3 +29,7 @@ def get_existing_file_ids(oh_member):
             id = file_info['id']
             ids.append(id)
     return ids
+
+
+def download_to_json(download_url):
+    return json.loads(requests.get(download_url).content)
