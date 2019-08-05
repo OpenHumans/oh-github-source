@@ -19,3 +19,12 @@ def create_file_metadata():
         'tags': ['Github', 'github', 'commits', 'code', 'repos'],
         'updated_at': str(datetime.utcnow()),
     }
+
+def get_existing_file_ids(oh_member):
+    # Right now this should be maximum one existing file
+    ids = []
+    for file_info in oh_member.list_files():
+        if 'Github' in file_info['metadata']['tags']:
+            id = file_info['id']
+            ids.append(ids)
+    return ids

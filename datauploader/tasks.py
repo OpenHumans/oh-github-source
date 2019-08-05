@@ -20,7 +20,7 @@ from ohapi import api
 import arrow
 
 import datauploader.api.rest as gh_api
-from datauploader.api.helpers import create_file_metadata
+from datauploader.api.helpers import create_file_metadata, get_existing_file_ids
 
 # Set up logging.
 logger = logging.getLogger(__name__)
@@ -48,10 +48,15 @@ def process_github(oh_id):
 
     gh_file = gh_api.get_github_data(oh_member, github_access_token, current_dt)
 
+    existing_file_ids = get_existing_file_ids(oh_member)
+
     api.upload_aws(gh_file, create_file_metadata(),
                    oh_access_token,
                    project_member_id=oh_id,
                    max_bytes=MAX_FILE_BYTES)
+
+    for id in existing_file_ids:
+        api.delete_file(oh_access_token, file_id=id)
 
     github_member.last_updated = arrow.now().format()
     github_member.save()
