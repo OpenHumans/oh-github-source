@@ -19,13 +19,14 @@ from requests_respectful import RequestsRespectfulRateLimitedError
 from ohapi import api
 import arrow
 
+import datauploader.api.rest as gh_api
+from datauploader.api.helpers import create_file_metadata
+
 # Set up logging.
 logger = logging.getLogger(__name__)
 
-GITHUB_API_BASE = 'https://api.github.com'
-# GITHUB_API_STORY = GITHUB_API_BASE + '/feeds'
-# GITHUB_API_REPO = GITHUB_API_BASE + '/user/repos'
-# GITHUB_API_STARS = GITHUB_API_BASE + '/user/starred'
+MAX_FILE_BYTES = 256000000
+
 
 @shared_task
 def process_github(oh_id):
@@ -37,17 +38,24 @@ def process_github(oh_id):
     oh_access_token = oh_member.get_access_token(
                             client_id=settings.OPENHUMANS_CLIENT_ID,
                             client_secret=settings.OPENHUMANS_CLIENT_SECRET)
-    github_data = get_existing_github_data(oh_access_token)#
+    #github_data = get_existing_github_data(oh_access_token)#
     github_member = oh_member.datasourcemember
     github_access_token = github_member.get_access_token(
                             client_id=settings.GITHUB_CLIENT_ID,
                             client_secret=settings.GITHUB_CLIENT_SECRET)
 
-    update_github(oh_member, github_access_token, github_data)
+    current_dt = datetime.utcnow()
 
+    gh_file = gh_api.get_github_data(oh_member, github_access_token, current_dt)
 
-def update_github(oh_member, github_access_token, github_data):
-    pass
+    api.upload_aws(gh_file, create_file_metadata(),
+                   oh_access_token,
+                   project_member_id=oh_id,
+                   max_bytes=MAX_FILE_BYTES)
+
+    github_member.last_updated = arrow.now().format()
+    github_member.save()
+
 
 
 def get_existing_github_data(oh_access_token):
