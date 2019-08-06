@@ -5,7 +5,7 @@ import requests
 from ohapi import api
 
 
-from datauploader.api.helpers import write_jsonfile_to_tmp_dir, download_to_json
+from datauploader.api.helpers import write_jsonfile_to_tmp_dir, download_to_json, get_commit_date
 
 # sort order is most recently created first
 # max page size = 100 (may not be respected or vary, but this is the max max)
@@ -84,8 +84,8 @@ def get_user_repos(github_access_token):
     results = []
     cnt = 0
     url = GITHUB_REPOS_ENDPOINT
-    while(True):
-        cnt+=1
+    while True:
+        cnt += 1
         response = requests.get(url, headers=get_auth_header(github_access_token))
         results += json.loads(response.content)
         next = response.links.get('next')
@@ -103,15 +103,29 @@ def get_repo_commits_for_user(github_access_token, repo, username, sync_after_da
     url = GITHUB_REPO_COMMITS_ENDPOINT.format(repo, username)
     # commits are fetched chronologically
     latest_commit_date = None
-    while True:
-        cnt+=1
+
+    reached_previous_data = False
+
+    while not reached_previous_data:
+        cnt += 1
         response = requests.get(url, headers=get_auth_header(github_access_token))
         commits = json.loads(response.content)
 
         if latest_commit_date is None and len(commits) > 0:
             # github returns the data in descending chronological order
             # date is in the format 2014-05-09T15:14:07Z
-            latest_commit_date = commits[0]['commit']['committer']['date']
+            latest_commit_date = get_commit_date(commits)
+
+        if sync_after_date is not None:
+            for idx, commit in enumerate(commits):
+                commit_date = get_commit_date(commit)
+                # this may not handle rebases/history rewrites 100% correctly
+                # is good effort for gathering our commit histories <:o)
+                if commit_date <= sync_after_date:
+                    reached_previous_data = True
+                    commits = commits[:idx]
+                    break
+
 
         results += commits
         # if results['type'] == 'PushEvent'
@@ -132,6 +146,13 @@ class GithubData(object):
         self.metadata = metadata
 
 
+    def get_last_commit_date_for_repo(self, repo):
+
+        if repo in self.repo_data:
+            return self.repo_data['last_commit_date']
+        return None
+
+
     def __repr__(self):
         return str(self.metadata) + '\n' + str(self.repo_data.keys())
 
@@ -147,8 +168,10 @@ class GithubData(object):
         repo_data = {}
         for repo_name in repo_names:
             print("Fetching commits for {}".format(repo_name))
-            # TODO handle stopping once we reach already synced data
-            repo_commits, latest_date = get_repo_commits_for_user(token, repo_name, username, sync_after_date=None)
+
+            last_existing_commit_date = existing_data.get_last_commit_date_for_repo(repo_name)
+
+            repo_commits, latest_date = get_repo_commits_for_user(token, repo_name, username, sync_after_date=last_existing_commit_date)
             print("Fetched {} commits".format(len(repo_commits)))
             # TODO: here, if this repo exists in the existing data, need to merge the commits
             repo_data[repo_name] = {"commits": repo_commits, "last_commit_date": latest_date,

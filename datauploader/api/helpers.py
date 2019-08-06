@@ -33,3 +33,7 @@ def get_existing_file_ids(oh_member):
 
 def download_to_json(download_url):
     return json.loads(requests.get(download_url).content)
+
+
+def get_commit_date(commit_rest_obj):
+    return commit_rest_obj['commit']['committer']['date']
