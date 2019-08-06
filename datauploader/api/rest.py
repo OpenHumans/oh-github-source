@@ -1,11 +1,9 @@
 import json
-import requests
-
 
 from ohapi import api
 
-
 from datauploader.api.helpers import write_jsonfile_to_tmp_dir, download_to_json, get_commit_date
+from demotemplate.settings import rr
 
 # sort order is most recently created first
 # max page size = 100 (may not be respected or vary, but this is the max max)
@@ -69,14 +67,14 @@ def get_rate_limit_remaining(github_access_token, type="core"):
     """
 
     auth_header = get_auth_header(github_access_token)
-    response = requests.get(GITHUB_RATE_LIMIT_ENDPOINT, headers=auth_header)
+    response = rr.get(GITHUB_RATE_LIMIT_ENDPOINT, headers=auth_header, realms=['github'])
     rate_limit_info = json.loads(response.content)['resources'][type]
     return rate_limit_info['remaining'], rate_limit_info['reset']
 
 
 def get_user_info(github_access_token):
     auth_header = get_auth_header(github_access_token)
-    response = requests.get(GITHUB_USER_INFO_ENDPOINT, headers=auth_header)
+    response = rr.get(GITHUB_USER_INFO_ENDPOINT, headers=auth_header, realms=['github'])
     return json.loads(response.content)
 
 
@@ -86,7 +84,7 @@ def get_user_repos(github_access_token):
     url = GITHUB_REPOS_ENDPOINT
     while True:
         cnt += 1
-        response = requests.get(url, headers=get_auth_header(github_access_token))
+        response = rr.get(url, headers=get_auth_header(github_access_token), realms=['github'])
         results += json.loads(response.content)
         next = response.links.get('next')
         if not next:
@@ -108,7 +106,7 @@ def get_repo_commits_for_user(github_access_token, repo, username, sync_after_da
 
     while not reached_previous_data:
         cnt += 1
-        response = requests.get(url, headers=get_auth_header(github_access_token))
+        response = rr.get(url, headers=get_auth_header(github_access_token), realms=['github'])
         commits = json.loads(response.content)
 
         if latest_commit_date is None and len(commits) > 0:

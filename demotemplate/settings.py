@@ -82,7 +82,8 @@ RespectfulRequester.configure(
     },
     safety_threshold=5)
 
-# This creates a Realm called "github" that allows 150 requests per minute maximum.
+# This creates a Realm called "github" that allows 5000 requests per hour maximum
+# so as to stay within the github API limit (assuming only 1 worker is active, of course)
 
 rr = RespectfulRequester()
 rr.register_realm("github", max_requests=5000, timespan=3600)
