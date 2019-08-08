@@ -44,9 +44,9 @@ def process_github(oh_id):
                             client_id=settings.GITHUB_CLIENT_ID,
                             client_secret=settings.GITHUB_CLIENT_SECRET)
 
-    current_dt = datetime.utcnow()
+    #print("OH access token: {}".format(oh_access_token))
 
-    gh_file = gh_api.get_github_data(oh_access_token, github_access_token, current_dt)
+    gh_file = gh_api.get_github_data(oh_access_token, github_access_token)
 
     existing_file_ids = get_existing_file_ids(oh_member)
     print(existing_file_ids)

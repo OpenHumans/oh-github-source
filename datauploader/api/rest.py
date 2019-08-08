@@ -16,7 +16,7 @@ GITHUB_REPOS_ENDPOINT = "https://api.github.com/user/repos?sort=created&per_page
 GITHUB_REPO_COMMITS_ENDPOINT = "https://api.github.com/repos/{}/commits?author={}&per_page=100"
 
 
-def get_github_data(oh_access_token, gh_access_token, current_date):
+def get_github_data(oh_access_token, gh_access_token):
 
     existing_github_data = get_last_synced_data(oh_access_token)
     new_github_data = GithubData.from_API(gh_access_token, existing_github_data)
