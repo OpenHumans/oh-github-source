@@ -65,7 +65,7 @@ OH_DELETE_FILES = OH_API_BASE + '/project/files/delete/'
 #Fitbit Configuration
 GITHUB_CLIENT_ID = os.getenv('GITHUB_CLIENT_ID')
 GITHUB_CLIENT_SECRET = os.getenv('GITHUB_CLIENT_SECRET')
-GITHUB_REDIRECT_URI = os.getenv('GITHUB_REDIRECT_URI')
+GITHUB_REDIRECT_URI = OPENHUMANS_APP_BASE_URL + '/github_complete'
 
 # Requests Respectful (rate limiting, waiting)
 from urllib.parse import urlparse
