@@ -20,3 +20,11 @@ pipenv:
 redis:
 	# create a new docker container with the redis image if one is not already running on port 6379, otherwise do nothing
 	@if [[ -z "`docker ps | grep 0.0.0.0:6379`" ]]; then docker run -p 6379:6379 -d redis; echo "redis docker container now running";  else echo "redis docker container already running:)";fi
+
+.PHONY: deploy
+deploy:
+	@git push heroku master
+
+.PHONY: force_deploy
+force_deploy:
+	@git push -f heroku master
