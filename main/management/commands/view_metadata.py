@@ -14,5 +14,5 @@ class Command(BaseCommand):
             except:
                 pass
             for dfile in member['data']:
-                if 'GoogleFit' in dfile['metadata']['tags']:
+                if 'Github' in dfile['metadata']['tags']:
                     print(dfile)
