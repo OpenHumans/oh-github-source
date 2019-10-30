@@ -12,7 +12,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         users = OpenHumansMember.objects.all()
-        print(users.oh_id)
         for user in users:
+            print(user.oh_id)
             if user.oh_id == options['ohid']:
                 user.delete_all_files()
