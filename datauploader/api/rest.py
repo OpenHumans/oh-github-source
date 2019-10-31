@@ -109,6 +109,11 @@ def get_repo_commits_for_user(github_access_token, repo, username, sync_after_da
         response = rr.get(url, headers=get_auth_header(github_access_token), realms=['github'])
         commits = json.loads(response.content)
 
+        if not isinstance(commits, list):
+            print("Got unexpected response from API - repo may be empty, will skip")
+            print(commits)
+            return [], None
+
         if latest_commit_date is None and len(commits) > 0:
             # github returns the data in descending chronological order
             # date is in the format 2014-05-09T15:14:07Z
@@ -183,6 +188,7 @@ class GithubData(object):
 
             repo_commits, latest_date = get_repo_commits_for_user(token, repo_name, username, sync_after_date=last_existing_commit_date)
             print("Fetched {} new commits".format(len(repo_commits)))
+
 
             if existing_data:
                 repo_commits = repo_commits + existing_data.get_commits_for_repo(repo_name)

@@ -11,7 +11,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         users = DataSourceMember.objects.all()
         for github_user in users:
-            if github_user.last_updated < (arrow.now() - timedelta(days=4)):
+            if github_user.last_updated < (arrow.now() - timedelta(days=1)):
                 print("Updating user {}".format(github_user.user.oh_id))
                 oh_id = github_user.user.oh_id
                 process_github.delay(oh_id)
