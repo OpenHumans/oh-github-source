@@ -60,6 +60,7 @@ def process_github(oh_id):
 
     github_member.last_updated = arrow.now().format()
     github_member.save()
+    # TODO: retry later (in 1 hour) if something went wrong!!
 
 
 
