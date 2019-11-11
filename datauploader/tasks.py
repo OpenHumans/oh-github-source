@@ -33,34 +33,41 @@ def process_github(oh_id):
     """
     Update the github file for a given OH user
     """
-    logger.debug('Starting github processing for {}'.format(oh_id))
-    oh_member = OpenHumansMember.objects.get(oh_id=oh_id)
-    oh_access_token = oh_member.get_access_token(
-                            client_id=settings.OPENHUMANS_CLIENT_ID,
-                            client_secret=settings.OPENHUMANS_CLIENT_SECRET)
-    #github_data = get_existing_github_data(oh_access_token)#
-    github_member = oh_member.datasourcemember
-    github_access_token = github_member.get_access_token(
-                            client_id=settings.GITHUB_CLIENT_ID,
-                            client_secret=settings.GITHUB_CLIENT_SECRET)
+    try:
+        logger.debug('Starting github processing for {}'.format(oh_id))
+        oh_member = OpenHumansMember.objects.get(oh_id=oh_id)
+        oh_access_token = oh_member.get_access_token(
+                                client_id=settings.OPENHUMANS_CLIENT_ID,
+                                client_secret=settings.OPENHUMANS_CLIENT_SECRET)
+        #github_data = get_existing_github_data(oh_access_token)#
+        github_member = oh_member.datasourcemember
+        github_access_token = github_member.get_access_token(
+                                client_id=settings.GITHUB_CLIENT_ID,
+                                client_secret=settings.GITHUB_CLIENT_SECRET)
 
-    #print("OH access token: {}".format(oh_access_token))
+        #print("OH access token: {}".format(oh_access_token))
 
-    gh_file = gh_api.get_github_data(oh_access_token, github_access_token)
+        gh_file = gh_api.get_github_data(oh_access_token, github_access_token)
 
-    existing_file_ids = get_existing_file_ids(oh_member)
-    print(existing_file_ids)
-    api.upload_aws(gh_file, create_file_metadata(),
-                   oh_access_token,
-                   project_member_id=oh_id,
-                   max_bytes=MAX_FILE_BYTES)
+        existing_file_ids = get_existing_file_ids(oh_member)
+        print(existing_file_ids)
+        api.upload_aws(gh_file, create_file_metadata(),
+                       oh_access_token,
+                       project_member_id=oh_id,
+                       max_bytes=MAX_FILE_BYTES)
 
-    for id in existing_file_ids:
-        api.delete_file(oh_access_token, file_id=id)
+        for id in existing_file_ids:
+            api.delete_file(oh_access_token, file_id=id)
 
-    github_member.last_updated = arrow.now().format()
-    github_member.save()
-    # TODO: retry later (in 1 hour) if something went wrong!!
+        github_member.last_updated = arrow.now().format()
+        github_member.save()
+    except Exception as e:
+        import traceback
+        print("Fetching github data failed: {}".format(e))
+        print(traceback.format_exc())
+        # queue to retry later
+        process_github.apply_async(args=[oh_id], countdown=4 * 3600)
+        raise
 
 
 
