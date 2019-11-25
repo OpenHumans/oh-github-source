@@ -179,13 +179,11 @@ Go to the `Resources` tab, and add the following Add-ons:
 
 Next go to the `settings` tab and add the environment variables as in the `.env` file.
 
-1. `OH_CLIENT_ID`
-2. `OH_CLIENT_SECRET`
-3. `OH_ACTIVITY_PAGE`
-4. `APP_BASE_URL` (e.g. https://your-app-name.herokuapp.com - no trailing dash!)
-5. `SECRET_KEY`
-6. `DEBUG` = true when needed
-7. `REMOTE` = true
+1. `OPENHUMANS_CLIENT_ID`
+2. `OPENHUMANS_CLIENT_SECRET`
+3. `OPEHUMANS_ACTIVITY_PAGE`
+4. `DEBUG` = true when needed
+5. `REMOTE` = true
 
 Head back over to your terminal and run the following command to initialize and update your code remotely in Heroku:
 
@@ -199,24 +197,6 @@ If you make changes you may have to migrate again, to do this run:
 `$ heroku run python manage.py migrate`
 `$ git push heroku master`
 
-
-## Adding dummy data
-
-To test out the app as a user, you can add dummy data to your project. First go to the url for your app (https://your-app-name.herokuapp.com), you should see the following page:
-
-![](https://cl.ly/1J3X35170e0s/Image%202018-02-16%20at%202.35.57%20AM.png)
-
-Click the button which will take you to Open Humans where you may have to log in. You should reach a page like this:
-
-![](https://cl.ly/1T2l1w2t2y0t/Image%202018-02-16%20at%202.37.17%20AM.png)
-
-Click the button to authorize the demo app to add data to your Open Humans account. You will be directed back to your app which will complete the data transfer, this should look like this:
-
-![](https://cl.ly/04040F1g2k1X/Image%202018-02-16%20at%202.38.37%20AM.png)
-
-You can then click to return to Open Humans to check that the demo data has been successfully added:
-
-![](https://cl.ly/1r0M1U2d2B1s/Image%202018-02-16%20at%202.40.26%20AM.png)
 
 ## Next steps
 
