@@ -15,7 +15,14 @@ from celery import Celery
 
 from django.conf import settings
 
-CELERY_BROKER_URL = os.getenv('REDIS_URL')
+
+
+redis_url = os.getenv("REDIS_URL", "redis://")
+
+if redis_url.startswith("rediss://"):
+    redis_url += "?ssl_cert_reqs=required"
+
+CELERY_BROKER_URL = redis_url
 
 # set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE',
